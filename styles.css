@@ -1,0 +1,25 @@
+* {
+    outline-style: dashed;
+    outline-width: 1px;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+}
+
+#gameboard {
+    width: 300px;
+    height: 300px;
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+}
+
+.square {
+    font-size: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
