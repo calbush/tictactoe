@@ -3,7 +3,8 @@
 const gameBoard = (() => {
     return {
         "squares":[0, 1, 2, 3, 4, 5, 6, 7, 8],
-        "winningOutcomes": [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]],
+        "gamePieces": ['X', 'O'],
+        "winningOutcomes": [["0","1","2"], ["3","4","5"], ["6","7","8"], ["0","3","6"], ["1","4","7"], ["2","5","8"], ["0","4","8"], ["2","4","6"]],
         "winningOutcomeIndices": {
             "0": [0, 3, 6],
             "1": [0, 4],
@@ -28,34 +29,44 @@ let playerCreator = ((player, gamePiece) => {
    }
 });
 
-let Caleb = playerCreator('Caleb', 'X');
-
-
 //Add event listeners to listen for click on gameboard squares. Upon click, store clicked square in player object value.
 (function() {
     let allSquares = document.querySelectorAll('.square')
-    for(i of allSquares){
+    let winner = false;
+    for(i of allSquares)
         i.addEventListener('click', (e) => {
-            e.target.innerHTML = Caleb.gamePiece;
-            let selectedSquare = e.target.dataset.squarevalue
+            //only execute if clicked square is empty
+            if(e.target.innerHTML == '' && !winner){
+                e.target.innerHTML = playerOne.gamePiece;
+                let selectedSquare = e.target.dataset.squarevalue
+            
             //if player clicks same square multiple times, subsequent clicks are not added to selectedSquares list
-            if (!Caleb.selectedSquares.includes(parseInt(e.target.dataset.squarevalue))){
-                Caleb.selectedSquares.push(parseInt(e.target.dataset.squarevalue))
+            if (!playerOne.selectedSquares.includes(e.target.dataset.squarevalue)){
+                playerOne.selectedSquares.push(e.target.dataset.squarevalue)
             }
-            playerTwoMove();
 
             //compare clicked squares to winning outcomes. 
             for (let i = 0; i < gameBoard.winningOutcomeIndices[selectedSquare].length; i++){
-                if (gameBoard.winningOutcomes[gameBoard.winningOutcomeIndices[selectedSquare][i]].every(iter => Caleb.selectedSquares.includes(iter))){
-                    console.log("WINNER WINNER")
+                if (gameBoard.winningOutcomes[gameBoard.winningOutcomeIndices[selectedSquare][i]].every(iter => playerOne.selectedSquares.includes(iter))){
+                    console.log(`${playerOne.gamePiece} Wins`)
+                    winner = true;
                 }
             }
-            
+            playerTwoMove();
+
+            let emptySquareCounter = 0
+            for (i of allSquares){
+                if (!i.innerHTML == ''){
+                    emptySquareCounter++
+                    if (emptySquareCounter == 9 && winner == false){
+                        console.log('tie')
+                    }
+                }
+            }
+        }
         })
-
     }
-})();
-
+)();
 
 //create array from empty squares, select a random number with the max random int being the length of the array 
 function playerTwoMove(){
@@ -70,17 +81,36 @@ function playerTwoMove(){
     let potentialMoves = emptySquares.length - 1
     if (potentialMoves > 0){
         let move = Math.round(Math.random() * potentialMoves)
-        emptySquares[move].innerHTML = 'O'
-    }
+        emptySquares[move].innerHTML = computer.gamePiece
+        
+        let computerRecentMove = emptySquares[move].dataset.squarevalue;
+        computer.selectedSquares.push(computerRecentMove)
 
-    
+        for (i = 0; i < gameBoard.winningOutcomeIndices[computerRecentMove].length; i++){
+            if (gameBoard.winningOutcomes[gameBoard.winningOutcomeIndices[computerRecentMove][i]].every(iter => computer.selectedSquares.includes(iter))){
+                console.log(`${computer.gamePiece} Wins`)
+                winner = true
+            } 
+    }  
+}
 }
 
-//DOM element for creating game piece
-/*(function(){
-    const gamePieceSelecter = document.createElement('input')
-    gamePieceSelecter.setAttribute('type', 'radio')
-    document.body.appendChild(gamePieceSelecter)
-})()
-*/
+let playerOne;
+let computer;
+
+(() => {
+    document.getElementsByName('gamePiece').forEach(radio => {
+        radio.addEventListener('click', () => {
+            let selectedBtn = document.querySelector('input[name="gamePiece"]:checked').value
+            console.log(selectedBtn)
+            playerOne = playerCreator('Cal', selectedBtn)
+            if (playerOne.gamePiece == 'X'){
+                computer = playerCreator('computer', 'O')
+            }
+            else if (playerOne.gamePiece == 'O'){
+                computer = playerCreator('computer', 'X')
+            }
+        })
+    })
+})();
 
